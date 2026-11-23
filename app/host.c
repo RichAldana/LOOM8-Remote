@@ -421,6 +421,8 @@ int app_expect(const char *what, int *got)
 {
     if (!strcmp(what, "playing"))
         *got = seq.playing;
+    else if (!strcmp(what, "gain"))                 /* the render's gain from MASTER (APP_GAIN: PANEL MIDI holds it) */
+        *got = (int)APP_GAIN(plat_master());
     else if (!strcmp(what, "scene"))
         *got = seq.scene + 1;
     else if (!strcmp(what, "mute"))

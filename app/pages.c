@@ -63,6 +63,8 @@ static const theme_t *theme = &THEMES[THEME_BW];
 #define CC_IN_ENDLESS 1u                               /* proj.rsv[3]: CCs in from endless encoders, each a turn
                                                         * (midicc.c cc_delta; absolute by default) */
 #define MOD_VIEW_OFF 2u                                /* proj.rsv[3]: no MOD VIEW (on by default, old FM-1s too) */
+#define USB_IN_MIX 4u                                  /* proj.rsv[3]: USB AUDIO IN, the computer's (a phone's) audio
+                                                        * mixed into LOOM-8's output (app.c; off by default) */
 #define K_BG theme->bg
 #define K_PANEL theme->panel
 #define K_PANEL2 theme->panel2
@@ -290,7 +292,7 @@ enum { A_CLEAR_NOTES, A_CLEAR_LOCKS, A_CLEAR_BOTH, A_COPY_PAT, A_PASTE_PAT, A_RO
        A_KIT, A_SAVE_KIT, A_MIDI_CC, A_USB_HOST, A_BT_MIDI, A_BT_AUDIO, A_BT_ADEV, A_BT_DEVICE, A_BT_DEV, A_BT_LOOK,
        A_BT_FORGET, A_BT_DISCONNECT, A_CLEAR, A_ROTATE, A_PASTE, A_COPY_EMPTY, A_CLEAR_BAR,
        A_COPY_SOUND, A_PASTE_SOUND, A_COPY_KEY, A_PASTE_KEY, A_COPY_SCENE, A_PASTE_SCENE, A_DUP_SLOT, A_KIT_FILTER,
-       A_SHIFT, A_LARGE_TYPE, A_CC_IN, A_FX_WIDTH, A_MOD_VIEW, A_PROJ1, A_PROJ2, A_PROJ3, A_PANEL_MIDI, NACTIONS };
+       A_SHIFT, A_LARGE_TYPE, A_CC_IN, A_FX_WIDTH, A_MOD_VIEW, A_PROJ1, A_PROJ2, A_PROJ3, A_PANEL_MIDI, A_USB_IN, NACTIONS };
 static const char *const ACTION_NAME[NACTIONS] = {
     "CLEAR NOTES", "CLEAR LOCKS", "CLEAR NOTES AND LOCKS", "COPY PATTERN", "PASTE PATTERN", "ROTATE FORWARD",
     "ROTATE BACK", "DUPLICATE BAR", "ENGINE", "PRESET", "SCRAMBLE", "SAVE AS PRESET", "RESET SOUND", "FOLLOWS CONDUCTOR",
@@ -302,7 +304,7 @@ static const char *const ACTION_NAME[NACTIONS] = {
     "USB PORT", "BT MIDI", "BT AUDIO", "AUDIO DEVICE", "MIDI DEVICE", "DEVICE", "LOOK AGAIN", "FORGET", "DISCONNECT",
     "CLEAR", "ROTATE", "PASTE", "COPY TO EMPTY", "CLEAR BAR", "COPY SOUND", "PASTE SOUND", "COPY DRUM", "PASTE DRUM",
     "COPY SCENE", "PASTE SCENE", "DUPLICATE SLOT", "KIT FILTER", "SHIFT NOTES", "LARGE TYPE", "CC IN", "PING WIDTH",
-    "MOD VIEW", "PROJ 1", "PROJ 2", "PROJ 3", "PANEL MIDI"};
+    "MOD VIEW", "PROJ 1", "PROJ 2", "PROJ 3", "PANEL MIDI", "USB AUDIO IN"};
 _Static_assert(NPROJ == 3, "GLO's list: an action a slot (A_PROJ1..A_PROJ3)");
 /* PANEL MIDI (panelmidi.c, in ui.c): its state and its switch, for Setup's row */
 static uint8_t pm_on;
@@ -315,7 +317,7 @@ static int pick_sets(int a)
     case A_FOLLOW: case A_USB_AUDIO: case A_COUNT_IN: case A_THEME: case A_LARGE_TYPE: case A_PLAYMODE: case A_FTYPE:
     case A_FX_HP: case A_FX_LP: case A_FX_SEND: case A_PUMP_BY: case A_PUMP_REL: case A_PUMP_ACC: case A_LEVEL:
     case A_SCENE_AT: case A_AUTOSAVE: case A_MIDI_OUT: case A_LOOP_FREE: case A_CC_OUT: case A_SCENES_OUT: case A_MIDI_CC:
-    case A_USB_HOST: case A_KIT_FILTER: case A_CC_IN: case A_FX_WIDTH: case A_MOD_VIEW: case A_PANEL_MIDI:
+    case A_USB_HOST: case A_KIT_FILTER: case A_CC_IN: case A_FX_WIDTH: case A_MOD_VIEW: case A_PANEL_MIDI: case A_USB_IN:
         return 1;
     default:
         return 0;
@@ -3090,6 +3092,9 @@ static void list_setup(int g)
     list_add(ACTION_NAME[A_BT_ADEV], baud_t, LK_ACTION, A_BT_ADEV);
     list_head("USB and MIDI");
     list_add(ACTION_NAME[A_USB_AUDIO], USBA_NAME[proj.usb_full < 3u ? proj.usb_full : 0u], LK_PICK, A_USB_AUDIO);
+#if FM1B_UAC_OUT || defined(PLAT_HOST)          /* (the simulator: plat_usb_play_gain for the tests) */
+    list_add(ACTION_NAME[A_USB_IN], proj.rsv[3] & USB_IN_MIX ? "mixed" : "off", LK_PICK, A_USB_IN);
+#endif
 #if FM1B_USB_HOST
     list_add(ACTION_NAME[A_USB_HOST], plat_usb_host_state() ? "MIDI host" : "computer", LK_PICK, A_USB_HOST);
 #endif

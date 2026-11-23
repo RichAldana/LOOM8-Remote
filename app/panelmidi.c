@@ -24,6 +24,10 @@
  * plays: 64 and up lit, 24 and up the middle level, 6 and up dim. Without them (no app sending, or none for 1.5 s):
  * GLO and FX lit, the way back, and nothing else.
  *
+ * MASTER while it lasts is the other FM-1's: LOOM-8's own level stays where MASTER was (app.h APP_GAIN), and so does
+ * the computer's audio mixed in (Setup's USB AUDIO IN, app.c). Back, LOOM-8 takes MASTER again once the pot comes to
+ * where it was (a pickup, so the level does not jump).
+ *
  * Part of ui.c (included before input()): ui.btn, ui.keys, ui.btn_used, say(), loom_lights. */
 
 #define PM_CH_BTN 14u                          /* channel 15 */
@@ -32,6 +36,7 @@
 #define PM_CHORD ((1u << B_GLO) | (1u << B_FX))
 #define PM_NLED 41u                            /* 14 buttons, 27 keys, by matrix id */
 #define PM_LED_MS 1500u                        /* the other side's lights kept this long after the last */
+#define PM_PICKUP 96u                          /* MASTER takes LOOM-8's level back within this of where it was held */
 
 static uint8_t pm_on;                          /* the panel goes out as MIDI (declared in pages.c too: Setup shows it) */
 static uint8_t pm_fired;                       /* the chord has acted: wait for it to be let go */
@@ -41,6 +46,21 @@ static uint32_t pm_ign;                        /* held when the panel went away:
 static int32_t pm_master = -1000;              /* the MASTER position last sent (0..4096) */
 static uint8_t pm_led[PM_NLED];                /* the other side's lights, 0..127 */
 static uint32_t pm_led_t;                      /* when they came (|1: never 0; 0: none) */
+/* LOOM-8's level while MASTER is the other FM-1's: MASTER's position when the panel went (+ 1; 0: the pot's), read by
+ * the render (app.h APP_GAIN); kept after the panel comes back until the pot reaches it (no jump in level) */
+volatile uint32_t loom_master_held;
+static uint8_t pm_above;                       /* the pot above the level held when the panel came back */
+
+/* MASTER back to LOOM-8 once the pot is at the level held, or has crossed it (a fast turn): 1 = taken back */
+static int pm_pickup(void)
+{
+    uint32_t m = plat_master(), h = loom_master_held - 1u;
+    if ((m + PM_PICKUP >= h && m <= h + PM_PICKUP) || (uint8_t)(m > h) != pm_above) {
+        loom_master_held = 0;
+        return 1;
+    }
+    return 0;
+}
 
 static void pm_send(uint32_t st, uint32_t d1, uint32_t d2)
 {
@@ -89,10 +109,13 @@ static void pm_set(int on)
         ui.keys = plat_keys();
         ui.btn_used |= btn;
         pm_led_t = 0;
-        say("PANEL MIDI", "off");
+        pm_above = (uint8_t)(plat_master() > loom_master_held - 1u);
+        say("PANEL MIDI", pm_pickup() ? "off" : "off: MASTER held");
         return;
     }
     pm_on = 1;
+    if (!loom_master_held)                     /* (still held from the last time: that level) */
+        loom_master_held = plat_master() + 1u;
     pm_ign = btn;
     pm_btn = pm_keys = 0;
     pm_master = -1000;
@@ -158,8 +181,11 @@ static int pm_input(void)
         pm_chord_t = 0;
         pm_fired = 0;
     }
-    if (!pm_on)
+    if (!pm_on) {
+        if (loom_master_held)                  /* the pickup: MASTER is LOOM-8's again at the level held */
+            (void)pm_pickup();
         return 0;
+    }
 
     pm_ign &= btn;                             /* (a button held when it began, let go: its note off is not sent) */
     ch = (btn ^ pm_btn) & ~pm_ign;

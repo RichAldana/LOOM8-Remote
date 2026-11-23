@@ -221,7 +221,7 @@ void project_random_sounds(uint32_t seed)
  * loaded takes them (app.h project_device_get / put around the load) */
 #define DEV_BITS (4u | 8u | 16u | 32u | 64u | 128u)   /* rsv[2]: pages.c AUTOSAVE_OFF, LOOP_FREE, CC_OUT_OFF, SCENES_OUT,
                                                         * bt.c BT_AUDIO_ON, BT_MIDI_OFF */
-#define DEV_BITS3 (1u | 2u)                            /* rsv[3]: pages.c CC_IN_ENDLESS, MOD_VIEW_OFF */
+#define DEV_BITS3 (1u | 2u | 4u)                       /* rsv[3]: pages.c CC_IN_ENDLESS, MOD_VIEW_OFF, USB_IN_MIX */
 static struct { uint8_t theme, bits, bits3, lights, clock, notes, usb; } dev;
 void project_device_get(void)
 {

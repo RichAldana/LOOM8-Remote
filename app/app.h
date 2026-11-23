@@ -88,6 +88,10 @@ void app_say(const char *a, const char *b);
 #define APP_BTDEV                       /* Bluetooth MIDI devices (fm1-base lib/btdev.h): GLO's BT DEVICE list (bt.c) */
 #define APP_SPLASH                      /* the name over the eight tracks' inks woven as threads */
 void app_splash(void);
+/* PANEL MIDI (panelmidi.c): MASTER goes out as MIDI, LOOM-8's level held where MASTER was (its position + 1; 0: the
+ * pot's own), until the pot comes back to it once the panel is LOOM-8's again */
+extern volatile uint32_t loom_master_held;
+#define APP_GAIN(m) (loom_master_held ? (loom_master_held - 1u) * (loom_master_held - 1u) >> 12 : (m) * (m) >> 12)
 #define APP_REDRAW                      /* the screen mirror lost a part (or a viewer came): every band again */
 #define MRQ 2048u                       /* the mirror's frame ring (fm1-base's 4096: RAM), a rect frame 1.1 KB at most */
 #define MR_SEGW 80u                     /* what the viewer has, by 80-pixel segments of each row (30: 4.8 KB more pool) */
@@ -186,7 +190,7 @@ typedef struct {
     uint8_t rsv[10];                    /* (format 4 had 14: its last four are master[0..3] now); rsv[0] the count-in,
                                          * [1] the theme, [2] bits (pages.c): 1 REC's mode, 2 SCENES SWITCH
                                          * (SCENES_AT_END), 4 AUTOSAVE_OFF, 8 LOOP_FREE, 16 CC_OUT_OFF, 32 SCENES_OUT, 64 BT_AUDIO_ON, 128 BT_MIDI_OFF (bt.c);
-                                         * [3] bits: 1 CC_IN_ENDLESS, 2 MOD_VIEW_OFF;
+                                         * [3] bits: 1 CC_IN_ENDLESS, 2 MOD_VIEW_OFF, 4 USB_IN_MIX;
                                          * [4..7] the save count (project.c: the slot saved or loaded last opens at
                                          * power-on); [8] the scenes used, written by every save (GLO's list shows
                                          * it without unpacking the patterns) */

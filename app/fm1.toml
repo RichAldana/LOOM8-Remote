@@ -11,8 +11,9 @@ ble_diag = false               # the link layer's diagnostics left out (~2.4 KB 
 bt_audio = true
 usb_audio_in = true            # the master output recordable over USB (Setup's USB AUDIO: follows the knob, or full)
 usb_audio_first = true         # the audio streaming interface listed first (macOS shows the audio device: felucca-bsp #10)
-usb_audio_out = false
-usb_audio_channels = 10        # the master on 1 and 2, tracks 1..8 on 3..10 (each at its level, before its pan: engine.c TRK_TAP); 44.1 kHz
+usb_audio_out = true           # a computer (a phone) plays through the FM-1 over USB: Setup's USB AUDIO IN mixes it in (off
+                               # by default); its ring (8 KB) is the RAM the tracks' channels below gave back
+usb_audio_channels = 2         # the master alone (was 10: the master on 1 and 2, tracks 1..8 on 3..10: engine.c TRK_TAP)
 usb_host = true                # the USB port as a MIDI host (Setup's USB PORT): a controller or a synth, through a powered hub
 mirror = true                  # the screen and the panel on a computer over USB (base/web/mirror, tools/fm1_mirror.py)
 backup = true                  # projects and presets over USB (base/tools/fm1_backup.py); the page adds the samples (app/web/backup/extras.js)

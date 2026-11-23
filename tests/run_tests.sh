@@ -91,7 +91,10 @@ else
     echo "  skip export-wasm, export-web (no emcc or node)"
 fi
 # the USB audio input's ten channels as usbtracks.xy recorded them: the tracks in their own, at their level, before their pan
-run usb-channels "$PY" tests/usbtracks_check.py "$B/scenarios/usbtracks"
+# (only with them: a build that gave them back for the computer's audio in, usb_audio_channels = 2, has the master alone)
+if grep -q '^usb_audio_channels *= *10' app/fm1.toml; then
+    run usb-channels "$PY" tests/usbtracks_check.py "$B/scenarios/usbtracks"
+fi
 # every page, engine and type, through the layout audit (tools/layout_sweep.py)
 "$PY" tools/layout_sweep.py build/gen/layout_sweep.xy
 rm -rf "$B/scenarios/layout_sweep" && mkdir -p "$B/scenarios/layout_sweep"

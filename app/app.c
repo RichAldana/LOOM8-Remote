@@ -153,6 +153,16 @@ void app_frame(void)
     plat_usb_audio_full(proj.usb_full != 0);        /* Setup's USB AUDIO: follows the knob, full, or stereo (full,
                                                      * the master alone) */
     eng_usb_stereo = proj.usb_full == 2;
+    {   /* Setup's USB AUDIO IN: the computer's (a phone's) audio mixed in at MASTER, or muted (fm1.toml usb_audio_out:
+         * the FM-1 is an output for it). Under PANEL MIDI, MASTER is the other FM-1's: the computer's audio stays at
+         * the level LOOM-8's own is held at (APP_GAIN), as far as 4096 goes */
+        uint32_t q = proj.rsv[3] & USB_IN_MIX ? 4096u : 0u;
+        if (q && loom_master_held) {
+            uint32_t m = plat_master(), h = loom_master_held - 1u, g = m * m >> 12, gh = h * h >> 12;
+            q = g && gh < g ? gh * 4096u / g : 4096u;
+        }
+        plat_usb_play_gain(q);
+    }
     usb_host_poll();
     ui_frame();
 }

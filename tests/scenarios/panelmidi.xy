@@ -79,3 +79,40 @@ sysex F0 7D 46 4C 30 01 F7
 expect_sysex F0 7D 46 4C 30 01 F7
 turn ALGO 1
 expect trk 13
+# 4. MASTER is the other FM-1's while the panel is MIDI: LOOM-8's level stays where it was (2048: gain 1024)
+expect gain 1024
+master 4000
+expect gain 1024
+# back (the app): the pot far from the level held, LOOM-8 keeps it until the pot comes to it (no jump)
+sysex F0 7D 46 4C 30 00 F7
+expect_sysex F0 7D 46 4C 30 00 F7
+wait 50
+expect gain 1024
+master 3000
+wait 50
+expect gain 1024
+master 2000
+wait 50
+expect gain 976
+master 3000
+wait 50
+expect gain 2197
+# 5. USB AUDIO IN: the computer's audio muted by default, mixed in once on (Setup, USB and MIDI)
+expect usb_play_gain 0
+tap GLO
+turn SELECT 5
+expect page Setup
+tap SEL
+rowval USB AUDIO IN = off
+row USB AUDIO IN
+turn ALGO 1
+wait 50
+rowval USB AUDIO IN = mixed
+expect usb_play_gain 4096
+# under PANEL MIDI it stays at LOOM-8's held level: MASTER held at 3000 (gain 2197), turned to 4000 (3906)
+sysex F0 7D 46 4C 30 01 F7
+expect_sysex F0 7D 46 4C 30 01 F7
+master 4000
+wait 50
+expect gain 2197
+expect usb_play_gain 2303

@@ -1337,7 +1337,7 @@ the autosave, Bluetooth audio and the Bluetooth MIDI device (see Bluetooth, belo
 Debug. The **SEL** list on Setup has the FM-1's own settings, in three groups:
 
 - Bluetooth: BT MIDI, MIDI DEVICE, BT AUDIO and AUDIO DEVICE.
-- USB and MIDI: the USB audio level, USB PORT, CLOCK, NOTES, CC IN, CC OUT, SCENES OUT and PANEL MIDI.
+- USB and MIDI: the USB audio level, USB AUDIO IN, USB PORT, CLOCK, NOTES, CC IN, CC OUT, SCENES OUT and PANEL MIDI.
 - LOOM-8: LIGHTS, THEME, AUTOSAVE, LOOP THROWS and MOD VIEW (see [The synth pages](#the-synth-pages)).
 
 All of Setup's settings, the theme too, belong to the FM-1, not the project. Every project you load or start keeps
@@ -1477,14 +1477,14 @@ hub, but the sound plays on. While USB PORT is MIDI host, there's no computer li
 or samples page. Bluetooth MIDI works as before. USB PORT goes back to **computer** at every start, so updating
 always works.
 
-You can also record LOOM-8 on a computer over USB, as an audio input with ten channels at 44.1 kHz. Channels 1
-and 2 carry the master, as you hear it. Channels 3 to 10 carry tracks 1 to 8, one track each, so you can record
-every track on its own. Each track's channel has the track at its level, before its pan, with its own filter and
-character. The sends' effects and the master's EQ, color, compressor and pump are only on channels 1 and 2. A
-muted track's channel is silent. To set the level of all ten, use USB audio on Setup's **SEL** list. With
-**follows knob**, MASTER sets it. With **full**, the speaker follows MASTER and the recording stays at full level.
-With **stereo**, the master is recorded at full level as with **full**, and channels 3 to 10 are silent. Use it when
-you only record the master: sending the tracks takes some of LOOM-8's time, which a busy song may need.
+You can also record LOOM-8 on a computer over USB, as a stereo audio input at 44.1 kHz: the master, as you hear it.
+(This version gives up the official one's ten channels, one per track, for USB AUDIO IN below: the two take the same
+memory.) To set its level, use USB audio on Setup's **SEL** list. With **follows knob**, MASTER sets it. With
+**full**, the speaker follows MASTER and the recording stays at full level. **stereo** is the same as **full** here.
+
+The FM-1 is also a USB audio output: a computer or a phone can play through it. With **USB AUDIO IN** on Setup's
+**SEL** list at **mixed**, what it plays is mixed into LOOM-8's output, at MASTER's level; at **off** (the default),
+it is muted. Either way, the USB recording above holds LOOM-8 alone, never what the computer plays.
 
 On Windows, a DAW such as Reaper uses one audio driver at a time. With WASAPI or ASIO, LOOM-8 and the device you
 listen on must run at the same rate. Most headphones and speakers are set to 48 kHz, so set yours to 44.1 kHz too:
@@ -1500,7 +1500,9 @@ USB audio. Turn it on from Setup's **SEL** list (USB and MIDI, PANEL MIDI: turn 
 and off. The lights then show the other FM-1's, when its app sends them; otherwise only GLO and FX are lit, the way
 back. LOOM-8 always starts with PANEL MIDI off. The panel goes out as RemoteFM1's panel events: the keys as notes 53 to
 79 on channel 16, the buttons as notes 0 to 13 on channel 15, the encoders as CC 16 to 22 on channel 15 (64 plus the
-turn), MASTER as CC 7 and 39 on channel 15.
+turn), MASTER as CC 7 and 39 on channel 15. MASTER sets the other FM-1's volume then, not LOOM-8's: LOOM-8 stays at
+the level it had. When the panel comes back, LOOM-8 keeps that level until you turn MASTER to it ("MASTER held"), so
+the level never jumps.
 
 The TRS jack is MIDI in. Everything that comes in over USB works from it too, except SysEx: notes, CCs, Program
 Change, and MIDI clock with start and stop. The FM-1 has no MIDI out jack, so LOOM-8 sends only over USB and
