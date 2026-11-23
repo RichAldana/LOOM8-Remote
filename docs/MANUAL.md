@@ -1337,7 +1337,7 @@ the autosave, Bluetooth audio and the Bluetooth MIDI device (see Bluetooth, belo
 Debug. The **SEL** list on Setup has the FM-1's own settings, in three groups:
 
 - Bluetooth: BT MIDI, MIDI DEVICE, BT AUDIO and AUDIO DEVICE.
-- USB and MIDI: the USB audio level, USB PORT, CLOCK, NOTES, CC IN, CC OUT and SCENES OUT.
+- USB and MIDI: the USB audio level, USB PORT, CLOCK, NOTES, CC IN, CC OUT, SCENES OUT and PANEL MIDI.
 - LOOM-8: LIGHTS, THEME, AUTOSAVE, LOOP THROWS and MOD VIEW (see [The synth pages](#the-synth-pages)).
 
 All of Setup's settings, the theme too, belong to the FM-1, not the project. Every project you load or start keeps
@@ -1491,6 +1491,16 @@ listen on must run at the same rate. Most headphones and speakers are set to 48 
 open Windows' Sound settings, choose the output device, and set its format to 44100 Hz. If it has to stay at
 48 kHz, choose DirectSound in your DAW instead, which converts between the two rates. A bridge such as ASIO4ALL also
 converts, but what you hear through it can distort. The recording itself stays clean.
+
+**PANEL MIDI** lends the FM-1's panel to another FM-1, an emulated one on a phone or a computer (FM1 Mix,
+RemoteFM1's hosts, FM1VST). While it is on, every key, button, encoder and the MASTER knob goes out over USB and
+Bluetooth as MIDI, and LOOM-8 doesn't see any of them. LOOM-8 keeps playing, keeps its clock going out and keeps its
+USB audio. Turn it on from Setup's **SEL** list (USB and MIDI, PANEL MIDI: turn **ALGORITHM**), or hold **GLO** and
+**FX** for a second. Hold **GLO** and **FX** again to get the panel back. The app on the other side can also turn it on
+and off. The lights then show the other FM-1's, when its app sends them; otherwise only GLO and FX are lit, the way
+back. LOOM-8 always starts with PANEL MIDI off. The panel goes out as RemoteFM1's panel events: the keys as notes 53 to
+79 on channel 16, the buttons as notes 0 to 13 on channel 15, the encoders as CC 16 to 22 on channel 15 (64 plus the
+turn), MASTER as CC 7 and 39 on channel 15.
 
 The TRS jack is MIDI in. Everything that comes in over USB works from it too, except SysEx: notes, CCs, Program
 Change, and MIDI clock with start and stop. The FM-1 has no MIDI out jack, so LOOM-8 sends only over USB and

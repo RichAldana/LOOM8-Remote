@@ -48,7 +48,8 @@
 #define SB_HDR1 0x46
 #define SB_HDR2 0x4C
 #include "dsp/bench.h"
-enum { SB_INFO = 1, SB_BEGIN = 11, SB_WRITE, SB_END, SB_ERASE, SB_SINFO, SB_HDR, SB_READ, SB_PING = 25, SB_PROF, SB_BENCH, SB_SOUND };
+enum { SB_INFO = 1, SB_BEGIN = 11, SB_WRITE, SB_END, SB_ERASE, SB_SINFO, SB_HDR, SB_READ, SB_PING = 25, SB_PROF, SB_BENCH, SB_SOUND,
+       SB_PANEL = 48, SB_LEDS };                     /* PANEL MIDI (panelmidi.c): its switch, the other FM-1's lights */
 #define SB_PART 320u                                 /* SMP_HDR: a header part, bytes */
 #define SB_NPART ((SMP_HDR_USED + SB_PART - 1u) / SB_PART)
 #define SB_INFO_K 12u                                /* SMP_INFO: samples a reply (12 x 18 bytes at most) */
@@ -207,6 +208,14 @@ static int smp_frame(const uint8_t *p, uint32_t n)
     case SB_PING:
         rp_byte(0);
         break;
+    case SB_PANEL:                                   /* 1 on, 0 off, else (2) asks; answered with the state */
+        if (na && a[0] < 2u)
+            pm_set(a[0]);
+        rp_byte(pm_on);
+        break;
+    case SB_LEDS:                                    /* the other FM-1's lights: never answered (they keep coming) */
+        pm_leds(a, na);
+        return 1;
     case SB_PROF: {
         uint32_t part = na ? a[0] & 63u : 0u, v[2 + 2 * ENG_PROF_N + 7], nv = 0;
         if (part == 0u) {

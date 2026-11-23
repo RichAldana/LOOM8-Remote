@@ -1,0 +1,81 @@
+# PANEL MIDI (panelmidi.c): the panel as MIDI for another FM-1, LOOM-8 deaf to it while it lasts.
+# 1. GLO + FX held a second: on, then off; 2. Setup > USB and MIDI > PANEL MIDI: on (the list goes), the chord back;
+# 3. the app's SysEx: SB_PANEL switches it and answers the state; SB_LEDS shows the other side's lights
+wait 300
+projnew
+# before: the panel is LOOM-8's own: ALGORITHM picks another track, and nothing goes out
+expect trk 1
+turn ALGO -1
+expect trk 13
+turn ALGO 1
+expect trk 1
+tapkey F3 100
+wait 50
+expect midi_out 0
+# 1. the chord
+press GLO
+press FX
+wait 1100
+release FX
+release GLO
+wait 50
+# now the panel is MIDI: a key, a button, two encoders (8 messages; the chord's own release is not sent)
+key F3 down
+wait 20
+key F3 up
+wait 20
+tap EDIT
+turn K1 2
+turn PRESET -1
+# LOOM-8 did not see any of it: ALGORITHM turns, the track stays
+turn ALGO -1
+expect trk 1
+wait 50
+# and back: the same chord, then the panel is LOOM-8's again and nothing more goes out
+press GLO
+press FX
+wait 1100
+release FX
+release GLO
+wait 50
+expect midi_out 14
+turn ALGO -1
+expect trk 13
+turn ALGO 1
+tapkey F3 100
+wait 50
+expect midi_out 14
+# 2. Setup: the row shows off, ALGORITHM turns it on, the list goes; the panel is MIDI
+tap GLO
+turn SELECT 5
+expect page Setup
+tap SEL
+rowval PANEL MIDI = off
+row PANEL MIDI
+turn ALGO 1
+wait 50
+turn ALGO -1
+expect trk 1
+# (the MASTER pot's position goes out first: 2 messages)
+expect midi_out 17
+# the lights: none from the other side yet: GLO and FX lit (the way back), nothing else
+wait 50
+leds
+# 3. the other side's lights: EDIT (matrix 6) and PLAY (12) lit, F3 (key 0: matrix 14) lit, G3 (16) at the middle level
+sysex F0 7D 46 4C 31 00 00 00 00 00 00 7F 00 00 00 00 00 7F 00 7F 00 30 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 F7
+wait 50
+leds
+# the app asks the state (2): on; switches it off (0): answered 0, LOOM-8's own lights and panel again
+sysex F0 7D 46 4C 30 02 F7
+expect_sysex F0 7D 46 4C 30 01 F7
+sysex F0 7D 46 4C 30 00 F7
+expect_sysex F0 7D 46 4C 30 00 F7
+turn ALGO -1
+expect trk 13
+wait 50
+leds
+# and on again from the app
+sysex F0 7D 46 4C 30 01 F7
+expect_sysex F0 7D 46 4C 30 01 F7
+turn ALGO 1
+expect trk 13
