@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: MPL-2.0
-"""Make the LOOM-8 site for GitHub Pages (https://charlesvestal.github.io/fm1-loom/):
+"""Make the LOOM-8 PANEL MIDI site for GitHub Pages (https://richaldana.github.io/LOOM8-Remote/), the same as
+Charles Vestal's LOOM-8 site (https://charlesvestal.github.io/fm1-loom/), for this fork:
 
   index.html                    what LOOM-8 is, and the ways in: try, install, download, manual, source
   manual/index.html             docs/MANUAL.md as a page (tools/make_manual.py), its screenshots in img/
@@ -41,7 +42,8 @@ sys.path.insert(0, str(SRC / "base" / "tools"))
 import make_site as base_site  # noqa: E402  (fm1-base's: the installer, the backup page, the package format)
 from make_site import product_of, strip_module  # noqa: E402
 
-REPO = "https://github.com/charlesvestal/fm1-loom"
+REPO = "https://github.com/RichAldana/LOOM8-Remote"
+UPSTREAM_SITE = "https://charlesvestal.github.io/fm1-loom/"    # (Charles Vestal's LOOM-8, which this fork follows)
 # the app's look (app/pages.c THEMES[0], "tape deck"): its eight track inks, and the site's palette from it: dark is the
 # FM-1's screen, light the same browns on cream paper. Every page of the site wears it (dress()), whatever names its own
 # stylesheet gives the colours, with a header to go between them.
@@ -109,7 +111,7 @@ LANDING = """<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LOOM-8</title>
+<title>LOOM-8 PANEL MIDI</title>
 <meta name="description" content="LOOM-8 turns the M-VAVE FM-1 into a pocket groovebox, with eight tracks, a 64-step sequencer with tricks and locks, weave, throws, a conductor and a song.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -128,6 +130,9 @@ h2 { font: 700 1.4rem "Barlow Semi Condensed", "Barlow", sans-serif; margin: 2.2
 .threads { display: flex; gap: 6px; margin: 0 0 1.4rem; }
 .threads span { flex: 1; height: 6px; border-radius: 3px; }
 .lede { font-size: 1.15rem; margin: 0 0 1.6rem; max-width: 36rem; }
+h1 .pm { color: var(--accent); white-space: nowrap; }
+.fork { border-left: 4px solid var(--accent); background: var(--card); border-radius: 0 14px 14px 0; padding: 12px 16px; margin: 0 0 1.6rem; }
+.fork p { margin: 0 0 .5rem; } .fork p:last-child { margin: 0; }
 .video { aspect-ratio: 16 / 9; margin: 0 0 1.4rem; border-radius: 14px; overflow: hidden; border: 1px solid var(--rule); background: #000; }
 .video iframe { width: 100%; height: 100%; border: 0; display: block; }
 .shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 0 0 1.8rem; }
@@ -148,11 +153,20 @@ code { font-size: .9em; }
 </head>
 <body>
 <main>
-<h1>LOOM-8</h1>
+<h1>LOOM-8 <span class="pm">PANEL MIDI</span></h1>
 <div class="threads" aria-hidden="true">__THREADS__</div>
 <p class="lede">LOOM-8 turns your M-VAVE FM-1 into a pocket groovebox. Fill eight tracks with synths, samples,
 chopped-up breaks or drums, and sequence them over 64 steps, with tricks and parameter locks on any step. Then weave
 two patterns together to get a third.</p>
+<div class="fork">
+<p><b>This is an unofficial fork</b> of <a href="__UPSTREAM__">LOOM-8 by Charles Vestal</a>: the same firmware, with two
+additions. For LOOM-8 itself, its news and its own installer, go to <a href="__UPSTREAM__">Charles's site</a>; for
+anything about this version, open an issue <a href="__REPO__/issues">on this fork</a>.</p>
+<p><b>PANEL MIDI</b> lends the FM-1's panel to an emulated FM-1 on a phone or a computer (FM1 Mix, RemoteFM1's
+hosts): every key, button, encoder and MASTER goes out as MIDI while LOOM-8 keeps playing. Turn it on from Setup, or
+hold GLO and FX for a second. <b>USB AUDIO IN</b>: a phone or a computer can play through the FM-1, mixed into
+LOOM-8's output. For it, the USB recording carries the master alone, not the ten channels of the official version.</p>
+</div>
 <div class="video"><iframe src="https://www.youtube-nocookie.com/embed/d84QXnfulRE" title="LOOM-8 video" loading="lazy"
   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
 <div class="shots">
@@ -162,7 +176,7 @@ two patterns together to get a third.</p>
 </div>
 <div class="status"><strong>Version __VERSION__.</strong> You install and remove it like any other fm1-base
 firmware, and the installer can always put M-VAVE's own firmware back. Install at your own risk.</div>
-<nav class="ways" aria-label="Get LOOM-8">
+<nav class="ways" aria-label="Get LOOM-8 PANEL MIDI">
   <a href="emu/"><strong>Try it in the browser</strong><span>Play it right here, with sound. It runs the same code as the FM-1, so you don't need one.</span></a>
   <a href="manual/"><strong>Read the manual</strong><span>Start with the ten-minute quick start, then look up any page or gesture.</span></a>
   <a href="install/"><strong>Install</strong><span>Connect your FM-1 by USB and install from Chrome or Edge. There's nothing to install on your computer.</span></a>
@@ -176,6 +190,9 @@ firmware, and the installer can always put M-VAVE's own firmware back. Install a
 
 <h2>What's in it</h2>
 <ul class="feat">
+  <li><b>PANEL MIDI</b> (this fork): the panel as RemoteFM1's panel events, the keys on channel 16, the buttons, the
+  encoders and MASTER on channel 15; the other side's app can turn it on and off and light the LEDs. See the manual's
+  USB and MIDI section.</li>
   <li><b>Eight tracks</b>, each with eight patterns of up to 64 steps. Give a track one of seven synths: knit (an everyday subtractive voice with supersaw unison), rayon (two-operator FM), jacquard (wavetables), bellows (an organ), cane and voile (physical models and voices from Mutable Instruments Braids) or acid (a TB-303 bass line, with accent and slide). Or play the sample bank with sample, chop up breaks with slice, put eleven drums on the black keys with the kit, or play another synth over USB or Bluetooth with midi. Start from 97 factory presets, and save 16 of your own.</li>
   <li>Add <b>tricks</b> to any step: pulse, hold, multiply, ramps, bends, jumps, skips and more. <b>Lock</b> any knob to its own value on any step.</li>
   <li><b>Weave</b> two patterns together. They can take turns bar by bar or step by step, or one can play its rhythm with the other's notes.</li>
@@ -278,7 +295,7 @@ def main(pkg, version, out):
     credits = conf.get("credits", "").replace("Built on fm1-base and felucca-bsp, from Felucca by Leo Kuroshita (Hügelton "
                                               "Instruments). ", "")        # (the page says that part itself)
     for key, val in (("RES", conf["resources_what"]), ("RES_JA", conf["resources_what_ja"]),   # (fm1.toml)
-                     ("NAME", "LOOM-8"), ("REPO", REPO), ("REPO_SHORT", REPO.replace("https://", "")),
+                     ("NAME", "LOOM-8 PANEL MIDI"), ("REPO", REPO), ("REPO_SHORT", REPO.replace("https://", "")),
                      ("LICENSE", conf.get("licence", "MPL-2.0")), ("CREDITS", " " + credits if credits else "")):
         page = page.replace("{{" + key + "}}", val)
     # since 0.7 the breaks are a pack for the user bank: say so where the firmware is installed
@@ -323,7 +340,8 @@ def main(pkg, version, out):
     shutil.copytree(SRC / "docs" / "img", out / "img")
     threads = "".join(f'<span style="background:{c}"></span>' for c in TRACKS)
     (out / "index.html").write_text(LANDING.replace("__VERSION__", html.escape(version)).replace("__PKG__", name)
-                                    .replace("__REPO__", REPO).replace("__THREADS__", threads), encoding="utf-8")
+                                    .replace("__REPO__", REPO).replace("__UPSTREAM__", UPSTREAM_SITE)
+                                    .replace("__THREADS__", threads), encoding="utf-8")
     (out / "manual").mkdir()
     subprocess.run([sys.executable, str(SRC / "tools" / "make_manual.py"), str(SRC / "docs" / "MANUAL.md"),
                     str(out / "manual" / "index.html")], check=True)

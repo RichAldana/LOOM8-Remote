@@ -1,0 +1,95 @@
+# SPDX-License-Identifier: MPL-2.0
+# The site on GitHub Pages (https://richaldana.github.io/LOOM8-Remote/): the landing page, the web installer, the
+# emulator, the manual, backup, samples, export and mirror, for one published release. What tools/publish_pages.sh does
+# on a computer, run on GitHub: the release's package downloaded (not rebuilt: the installer writes the attested file),
+# the browser build made from the same tag, tools/make_pages.py, the result pushed to the gh-pages branch.
+#   - called by release.yml once a release is published;
+#   - or by hand: Actions > "Site" > Run workflow, with the release's tag (v0.18.2-pm1), to rebuild the site.
+# Once, in the repository's settings: Pages > Build and deployment > Deploy from a branch: gh-pages, / (root).
+name: Site
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "The release's tag (v0.18.2-pm1)"
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: loom-pages
+  cancel-in-progress: false
+
+jobs:
+  site:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write       # the gh-pages branch
+      pages: write          # asking GitHub Pages to build it now
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      TAG: ${{ inputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Pillow with raqm (the fonts' OpenType features)
+        run: |
+          set -euo pipefail
+          sudo apt-get install -y -qq libfribidi0
+          python3 -m pip install -q Pillow
+          python3 -c "from PIL import features; assert features.check('raqm'), 'Pillow without raqm'"
+      - name: Emscripten (the same as the release's)
+        run: |
+          set -euo pipefail
+          git clone -q https://github.com/emscripten-core/emsdk.git "$RUNNER_TEMP/emsdk"
+          git -C "$RUNNER_TEMP/emsdk" checkout -q a2b92777574c2feda07994cd4f1079a3dfc151f8   # emsdk 6.0.10
+          "$RUNNER_TEMP/emsdk/emsdk" install 6.0.10
+          "$RUNNER_TEMP/emsdk/emsdk" activate 6.0.10
+      - name: The release's package and resources
+        run: |
+          set -euo pipefail
+          v=${TAG#v}
+          mkdir -p app/build
+          gh release download "$TAG" -p "loom-$v.fwsc" -p "loom-$v-res.bin" -D app/build --clobber
+          ls -l app/build
+      - name: The browser build, its tests, the site
+        run: |
+          set -euo pipefail
+          set +u; source "$RUNNER_TEMP/emsdk/emsdk_env.sh"; set -u
+          v=${TAG#v}
+          ./build.sh --web --release "$v"
+          node tests/host/emu_test.mjs app/build/emu/app.wasm
+          node tests/host/emu_page_test.mjs app/build/emu
+          python3 tools/make_pages.py "app/build/loom-$v.fwsc" "$v" build/pages
+      - name: Push it to gh-pages
+        run: |
+          set -euo pipefail
+          cd build/pages
+          git init -q -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Site for LOOM-8 PANEL MIDI ${TAG#v} (from ${GITHUB_SHA::7})"
+          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
+          # ask GitHub Pages to build it now (a push alone has left a first deploy stuck on "building")
+          gh api -X POST "repos/$GITHUB_REPOSITORY/pages/builds" >/dev/null 2>&1 \
+            || echo "::notice::could not ask GitHub Pages to build: Settings > Pages > Deploy from a branch, gh-pages"
+          owner=${GITHUB_REPOSITORY%%/*}
+          echo "site: https://${owner,,}.github.io/${GITHUB_REPOSITORY#*/}/  installer: https://${owner,,}.github.io/${GITHUB_REPOSITORY#*/}/install/"
