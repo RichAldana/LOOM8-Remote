@@ -43,6 +43,13 @@ jobs:
         with:
           ref: ${{ inputs.tag }}
           submodules: recursive
+      # (the install page's firmware chooser: tools/install_chooser.py as the workflow's own commit has it, so a site
+      # rebuilt for an older tag gets it too)
+      - uses: actions/checkout@v4
+        with:
+          path: wf
+          sparse-checkout: tools/install_chooser.py
+          sparse-checkout-cone-mode: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -78,6 +85,8 @@ jobs:
           node tests/host/emu_test.mjs app/build/emu/app.wasm
           node tests/host/emu_page_test.mjs app/build/emu
           python3 tools/make_pages.py "app/build/loom-$v.fwsc" "$v" build/pages
+          # the install page asks first: LOOM-8 (here) or Skiff (Skiff-Remote's installer); the link stays the same
+          python3 wf/tools/install_chooser.py build/pages/install/index.html
       - name: Push it to gh-pages
         run: |
           set -euo pipefail
